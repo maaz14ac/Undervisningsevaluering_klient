@@ -1,4 +1,5 @@
 $(document).ready(function () {
+    //Henter eventuelle kurser forbundet til brugeren ved load.
     getCourses();
 
     $('#logoutButton').on('click', function () {
@@ -12,6 +13,11 @@ $(document).ready(function () {
             $tds = $row.find("td:nth-child(2)").text();
 
         SDK.Storage.persist("courseId", $tds);
+
+        $('#lectureRating').barrating({
+            theme: 'fontawesome-stars-o',
+            initialRating: null
+        });
 
         getLectures();
     });
@@ -27,7 +33,10 @@ $(document).ready(function () {
 
     $('#myModal').on('hidden.bs.modal', function (e) {
         $("#comments").empty();
-        $("#avgRatingContainer").empty();
+    });
+
+    $(document).on('click', '#deleteComment', function () {
+        deleteReview();
     });
 
 });
@@ -42,45 +51,18 @@ function getCourses() {
             if (err) throw err;
 
             var courseNr = 1;
-            var starID = 1;
             var $courseTableBody = $("#courseTableBody");
             var decrypted = $.parseJSON(SDK.Decrypt(data));
 
             decrypted.forEach(function (course) {
+
                 $courseTableBody.append(
                     "<tr>" +
                     "<td>" + courseNr + "</td>" +
                     "<td>" + course.displaytext + "</td>" +
                     "<td>" + course.code + "</td>" +
-                    "<td class='text-center'>" + "<select class='avgLectureRating' id='starAvg" + starID + "'>" +
-                                "<option value=''></option>" +
-                                "<option value='1'>1</option>" +
-                                "<option value='2'>2</option>" +
-                                "<option value='3'>3</option>" +
-                                "<option value='4'>4</option>" +
-                                "<option value='5'>5</option>" +
-                           + "</select>" +
-                    "</td>" +
                     "<td><button type='button' id='showLecture' class='btn btn-default'>Vis</button></td>" +
                     "</tr>");
-
-                SDK.Storage.persist("courseId", course.displaytext);
-
-                SDK.Course.getAvg(function (err, data) {
-                    if (err) throw err;
-
-                    var avg = $.parseJSON(SDK.Decrypt(data));
-
-                    $('#starAvg' + starID).barrating({
-                        theme: 'fontawesome-stars-o',
-                        readonly: true,
-                        initialRating: avg,
-                        silent: false
-                    });
-
-                    starID++;
-
-                });
                 courseNr++
             });
         }
@@ -102,7 +84,7 @@ function getLectures() {
                     "<td>" + lecture.description + "</td>" +
                     "<td>" + lecture.startDate + "</td>" +
                     "<td>" + lecture.endDate + "</td>" +
-                    "<td><button type='button' class='btn btn-default' data-toggle='modal' data-target='#myModal' id='commentButton'>Se bedømmelser og kommentarer</button></td>" +
+                    "<td><button type='button' class='btn btn-default' data-toggle='modal' data-target='#myModal' id='commentButton'>Bedøm eller kommentér</button></td>" +
                     "</tr>");
             });
         }
@@ -110,36 +92,20 @@ function getLectures() {
 }
 
 function getReviews(){
-    $("#avgRatingContainer").append(
-        "<select id='avgLectureRating'>" +
-            "<option value=''></option>" +
-            "<option value='1'>1</option>" +
-            "<option value='2'>2</option>" +
-            "<option value='3'>3</option>" +
-            "<option value='4'>4</option>" +
-            "<option value='5'>5</option>" +
-        "</select>"
-    );
-
     SDK.Review.getAll(function (err, data) {
             if (err){
-                $(".form-horizontal").show();
-                $("#submitReview").show();
-                $("#deleteComment").hide();
-
-                $("#avgLectureRating").barrating({
+                $('#lectureRating').barrating({
                     theme: 'fontawesome-stars-o',
-                    readonly: true
+                    initialRating: null
                 });
 
-                $("#avgLectureRating").barrating("set", 0);
-
-                $("#comments").append("<br><h4 class='text-center'>Ingen kommentarer eller bedømmelser...</h4><br>");
+                $("#comments").append("<h4 class='text-center'>Der er ingen bedømmelser eller kommentarer...</h4>");
 
                 throw err;
             }
             var decrypted = $.parseJSON(SDK.Decrypt(data));
             var commentDiv = $("#comments");
+            console.log(decrypted);
             var starID = 1;
 
             decrypted.forEach(function (decrypted) {
@@ -161,6 +127,7 @@ function getReviews(){
                     "</select>" +
                     decrypted.comment +
                     "<br>" +
+                    "<button type='button' class='btn btn-danger btn-xs' style='margin-top: 8px;'><i class='fa fa-trash-o' aria-hidden='true'></i> Slet kommentar</button>" +
                     "</div>" +
                     "</div>");
                 $('.submittedRating').barrating({
@@ -169,29 +136,24 @@ function getReviews(){
                     silent: false
                 });
                 $("#star" + starID).barrating("set", decrypted.rating);
-
-                if(decrypted.userId != "" && decrypted.userId == SDK.Storage.load("userId")){
-                    $(".form-horizontal").hide();
-                    $("#submitReview").hide();
-                    $("#deleteComment").show();
-                    $("#deleteComment").attr("data-id", decrypted.id);
-                }else{
-                    $("#deleteComment").hide();
-                }
-                starID++;
+                starID++
             });
-            SDK.Lecture.getAvg(function (err, data) {
-                if (err) throw err;
+        }
+    );
+}
 
-                var avg = $.parseJSON(SDK.Decrypt(data));
+function deleteReview() {
+    var id = $("#deleteComment").attr("data-id");
+    var userID = SDK.Storage.load("userId");
 
-                $('#avgLectureRating').barrating({
-                    theme: 'fontawesome-stars-o',
-                    readonly: true
-                });
-                $("#avgLectureRating").barrating("set", avg);
+    var data = {
+        id: id,
+        userId: userID,
+    };
 
-            });
+    SDK.Review.delete(data, function (err, data) {
+            if (err) throw err;
+            location.reload();
         }
     );
 }

@@ -19,7 +19,7 @@
     <link href="css/stylesheet.css" rel="stylesheet">
 </head>
 
-<body id="teacherPage">
+<body id="adminPage">
 
 <nav class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
@@ -35,7 +35,7 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav navbar-right">
-                <li><p class="navbar-text">Du er logget ind som underviser</p></li>
+                <li><p class="navbar-text">Du er logget ind som admin</p></li>
                 <li><button type="button" class="btn btn-default navbar-btn" id="logoutButton"><i class="fa fa-sign-out" aria-hidden="true"></i> Log ud</button></li>
             </ul>
         </div>
@@ -58,7 +58,6 @@
                                 <th>#</th>
                                 <th>Navn</th>
                                 <th>Semester</th>
-                                <th class="text-center">Gennemsnitlig bedømmelse</th>
                                 <th></th>
                             </tr>
                             </thead>
@@ -102,7 +101,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script src="js/jquery.barrating.min.js"></script>
 <script src="js/sdk.js"></script>
-<script src="js/underviser.js"></script>
+<script src="js/admin.js"></script>
 </body>
 <!-- Modal -->
 <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
@@ -123,18 +122,6 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <div class="row">
-                    <div class="col-sm-12 col-md-12">
-                        <div class="form-horizontal">
-                            <div class="form-group">
-                                <label for="avgLectureRating" class="col-sm-4 col-sm-offset-2 control-label">Gennemsnitlige vurdering:</label>
-                                <div class="col-sm-2 text-left" id="avgRatingContainer">
-
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
                 <button type="button" class="btn btn-default" data-dismiss="modal">Luk</button>
             </div>
         </div>

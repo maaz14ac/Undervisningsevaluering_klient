@@ -32,6 +32,9 @@ var SDK = {
     Course: {
         getAll: function (cb) {
             SDK.request({method: "GET", url: "/course/" + SDK.Storage.load("userId")}, cb);
+        },
+        getAvg: function (cb) {
+            SDK.request({method: "GET", url: "/teacher/course/stat/" + SDK.Storage.load("courseId")}, cb);
         }
     },
 
