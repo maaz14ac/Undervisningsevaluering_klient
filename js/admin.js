@@ -35,8 +35,11 @@ $(document).ready(function () {
         $("#comments").empty();
     });
 
-    $(document).on('click', '#deleteComment', function () {
-        deleteReview();
+    $(document).on('click', '.deleteComment', function () {
+        var id = $(this).attr("data-id");
+        var userID = $(this).attr("data-user");
+
+        deleteReview(id, userID);
     });
 
 });
@@ -84,7 +87,7 @@ function getLectures() {
                     "<td>" + lecture.description + "</td>" +
                     "<td>" + lecture.startDate + "</td>" +
                     "<td>" + lecture.endDate + "</td>" +
-                    "<td><button type='button' class='btn btn-default' data-toggle='modal' data-target='#myModal' id='commentButton'>Bedøm eller kommentér</button></td>" +
+                    "<td><button type='button' class='btn btn-default' data-toggle='modal' data-target='#myModal' id='commentButton'>Se bedømmelser og kommentarer</button></td>" +
                     "</tr>");
             });
         }
@@ -105,7 +108,6 @@ function getReviews(){
             }
             var decrypted = $.parseJSON(SDK.Decrypt(data));
             var commentDiv = $("#comments");
-            console.log(decrypted);
             var starID = 1;
 
             decrypted.forEach(function (decrypted) {
@@ -127,7 +129,7 @@ function getReviews(){
                     "</select>" +
                     decrypted.comment +
                     "<br>" +
-                    "<button type='button' class='btn btn-danger btn-xs' style='margin-top: 8px;'><i class='fa fa-trash-o' aria-hidden='true'></i> Slet kommentar</button>" +
+                    "<button type='button' class='btn btn-danger btn-xs deleteComment' style='margin-top: 8px;' data-id='" + decrypted.id + "' data-user='" + decrypted.userId + "'><i class='fa fa-trash-o' aria-hidden='true'></i> Slet kommentar</button>" +
                     "</div>" +
                     "</div>");
                 $('.submittedRating').barrating({
@@ -136,23 +138,25 @@ function getReviews(){
                     silent: false
                 });
                 $("#star" + starID).barrating("set", decrypted.rating);
+                if(decrypted.comment === ''){
+                    $('[data-id="'+ decrypted.id +'"]').hide();
+                }
                 starID++
             });
         }
     );
 }
 
-function deleteReview() {
-    var id = $("#deleteComment").attr("data-id");
-    var userID = SDK.Storage.load("userId");
-
+function deleteReview(id, userID) {
     var data = {
         id: id,
-        userId: userID,
+        userId: userID
     };
 
-    SDK.Review.delete(data, function (err, data) {
+    SDK.Review.deleteComment(data, function (err, data) {
             if (err) throw err;
+
+            console.log(id + " " + userID);
             location.reload();
         }
     );

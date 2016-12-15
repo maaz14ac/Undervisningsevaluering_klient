@@ -191,7 +191,7 @@ function deleteReview() {
 
     var data = {
         id: id,
-        userId: userID,
+        userId: userID
     };
 
     SDK.Review.delete(data, function (err, data) {

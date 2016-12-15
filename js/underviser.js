@@ -8,6 +8,7 @@ $(document).ready(function () {
     $(document).on('click', '#showLecture', function () {
         $("#lectureTableBody").empty();
 
+
         var $row = $(this).closest("tr"),
             $tds = $row.find("td:nth-child(2)").text();
 

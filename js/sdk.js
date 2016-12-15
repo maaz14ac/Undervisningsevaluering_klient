@@ -58,6 +58,13 @@ var SDK = {
                 url: "/student/review",
                 data: data
             }, cb);
+        },
+        deleteComment: function (data, cb) {
+            SDK.request({
+                method: "DELETE",
+                url: "/admin/review",
+                data: data
+            }, cb);
         }
     },
 
