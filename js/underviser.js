@@ -1,5 +1,4 @@
 $(document).ready(function () {
-    //Henter eventuelle kurser forbundet til brugeren ved load.
     getCourses();
 
     $('#logoutButton').on('click', function () {
@@ -14,11 +13,6 @@ $(document).ready(function () {
 
         SDK.Storage.persist("courseId", $tds);
 
-        $('#lectureRating').barrating({
-            theme: 'fontawesome-stars-o',
-            initialRating: null
-        });
-
         getLectures();
     });
 
@@ -31,17 +25,8 @@ $(document).ready(function () {
         getReviews();
     });
 
-    $(document).on('click', '#submitReview', function () {
-        createReview();
-    });
-
     $('#myModal').on('hidden.bs.modal', function (e) {
         $("#comments").empty();
-        $("#inputComment").val("");
-    });
-
-    $(document).on('click', '#deleteComment', function () {
-        deleteReview();
     });
 
 });
@@ -89,7 +74,7 @@ function getLectures() {
                     "<td>" + lecture.description + "</td>" +
                     "<td>" + lecture.startDate + "</td>" +
                     "<td>" + lecture.endDate + "</td>" +
-                    "<td><button type='button' class='btn btn-default' data-toggle='modal' data-target='#myModal' id='commentButton'>Bedøm eller kommentér</button></td>" +
+                    "<td><button type='button' class='btn btn-default' data-toggle='modal' data-target='#myModal' id='commentButton'>Se bedømmelser og kommentarer</button></td>" +
                     "</tr>");
             });
         }
@@ -103,18 +88,19 @@ function getReviews(){
                 $("#submitReview").show();
                 $("#deleteComment").hide();
 
-                $('#lectureRating').barrating({
+                $("#avgLectureRating").barrating({
                     theme: 'fontawesome-stars-o',
-                    initialRating: null
+                    readonly: true
                 });
 
-                $("#comments").append("<h4 class='text-center'>Der er ingen bedømmelser eller kommentarer...</h4>");
+                $("#avgLectureRating").barrating("set", 0);
+
+                $("#comments").append("<br><h4 class='text-center'>Ingen kommentarer eller bedømmelser...</h4><br>");
 
                 throw err;
             }
             var decrypted = $.parseJSON(SDK.Decrypt(data));
             var commentDiv = $("#comments");
-            console.log(decrypted);
             var starID = 1;
 
             decrypted.forEach(function (decrypted) {
@@ -136,6 +122,7 @@ function getReviews(){
                     "</select>" +
                     decrypted.comment +
                     "<br>" +
+                    "<small> Created by: " + decrypted.userId + "</small>" +
                     "</div>" +
                     "</div>");
                 $('.submittedRating').barrating({
@@ -153,50 +140,34 @@ function getReviews(){
                 }else{
                     $("#deleteComment").hide();
                 }
-                starID++
+                starID++;
+            });
+            SDK.Lecture.getAvg(function (err, data) {
+                if (err) throw err;
+
+                var avg = $.parseJSON(SDK.Decrypt(data));
+
+                console.log(avg);
+
+                $('#avgLectureRating').barrating({
+                    theme: 'fontawesome-stars-o',
+                    readonly: true
+                });
+                $("#avgLectureRating").barrating("set", avg);
+
             });
         }
     );
 }
 
-function createReview() {
-    var rating = $("#lectureRating").val();
+function lectureAvg(){
+    SDK.Lecture.getAvg(function (err, data) {
+        if (err) throw err;
 
-    if(rating === ""){
-        rating = 0;
-    }
+        var decrypted = $.parseJSON(SDK.Decrypt(data));
 
-    var comment = $("#inputComment").val();
-    var lecture = SDK.Storage.load("lectureId");
-    var userID = SDK.Storage.load("userId");
+        console.log(decrypted);
 
 
-    var review = {
-        userId: userID,
-        lectureId: lecture,
-        rating: rating,
-        comment: comment
-    };
-
-    SDK.Review.create(review, function (err, data) {
-            if (err) throw err;
-            location.reload();
-        }
-    );
-}
-
-function deleteReview() {
-    var id = $("#deleteComment").attr("data-id");
-    var userID = SDK.Storage.load("userId");
-
-    var data = {
-        id: id,
-        userId: userID,
-    };
-
-    SDK.Review.delete(data, function (err, data) {
-            if (err) throw err;
-            location.reload();
-        }
-    );
+    });
 }

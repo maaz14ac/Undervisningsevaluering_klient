@@ -59,11 +59,14 @@ var SDK = {
     },
 
     /**
-     * Henter lektioner ned for et specifikt kursus.
+     * Henter lektioner og et bedømmelses gennemsnit ned for et specifikt kursus.
      * */
     Lecture: {
         getAll: function (cb) {
             SDK.request({method: "GET", url: "/lecture/" + SDK.Storage.load("courseId")}, cb);
+        },
+        getAvg: function (cb) {
+            SDK.request({method: "GET", url: "/teacher/lecture/stat/" + SDK.Storage.load("lectureId")}, cb);
         }
     },
 
