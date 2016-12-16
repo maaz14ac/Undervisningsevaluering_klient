@@ -1,5 +1,5 @@
 /**
- * En SDK over de grundlæggende AJAX-anmodninger udviklet på baggrund
+ * En SDK over de grundlæggende AJAX-anmodninger. Udviklet på baggrund
  * af Jesper Bruun Hansens Javascript Crash Course @ CBS.
  * (https://github.com/Distribuerede-Systemer-2016/javascript-client)
  * */
@@ -40,6 +40,7 @@ var SDK = {
 
     /**
      * Henter, opretter og sletter "reviews" på lektioner.
+     * Sletter kommentarer på lektioner uden at berører rating.
      * */
     Review: {
         getAll: function (cb) {

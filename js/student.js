@@ -14,6 +14,7 @@ $(document).ready(function () {
 
         SDK.Storage.persist("courseId", $tds);
 
+        //Initialisere jQuery Bar Rating Plugin (rating stjernerne)
         $('#lectureRating').barrating({
             theme: 'fontawesome-stars-o',
             initialRating: null
@@ -40,17 +41,25 @@ $(document).ready(function () {
         $("#inputComment").val("");
     });
 
+    //Kalder funktionen deleteReview idet der trykkes på delete-knappen.
     $(document).on('click', '#deleteComment', function () {
         deleteReview();
     });
 
 });
 
+/**
+ * Fjerner brugeroplysninger gemt i localStorage, og logger ud ved at sende tilbage til login-siden.
+ * */
 function logout() {
     SDK.logOut();
     window.location.href = "login.html";
 }
 
+/**
+ * Henter kurser for en given bruger, dekryptere og
+ * tilføjer til tabellen med id: courseTableBody ved hjælp af en løkke.
+ * */
 function getCourses() {
     SDK.Course.getAll(function (err, data) {
             if (err) throw err;
@@ -74,6 +83,10 @@ function getCourses() {
     );
 }
 
+/**
+ * Henter lektioner for en given bruger, dekryptere og
+ * tilføjer til tabellen med id: lectureTableBody ved hjælp af en løkke.
+ * */
 function getLectures() {
     SDK.Lecture.getAll(function (err, data) {
             if (err) throw err;
@@ -96,9 +109,14 @@ function getLectures() {
     );
 }
 
+/**
+ * Henter reviews for en given bruger, dekryptere og
+ * tilføjer til tabellen med id: lectureTableBody ved hjælp af en løkke.
+ * */
 function getReviews(){
     SDK.Review.getAll(function (err, data) {
             if (err){
+                //I tilfælde af at ingen reviews findes vises form og delete-knappen skjules.
                 $(".form-horizontal").show();
                 $("#submitReview").show();
                 $("#deleteComment").hide();
@@ -114,7 +132,6 @@ function getReviews(){
             }
             var decrypted = $.parseJSON(SDK.Decrypt(data));
             var commentDiv = $("#comments");
-            console.log(decrypted);
             var starID = 1;
 
             decrypted.forEach(function (decrypted) {
@@ -145,6 +162,7 @@ function getReviews(){
                 });
                 $("#star" + starID).barrating("set", decrypted.rating);
 
+                //I tilfælde af at der findes et review med brugerens id vises muligheden for at slette.
                 if(decrypted.userId != "" && decrypted.userId == SDK.Storage.load("userId")){
                     $(".form-horizontal").hide();
                     $("#submitReview").hide();
@@ -159,9 +177,14 @@ function getReviews(){
     );
 }
 
+
+/**
+ * Opretter et review på baggrund af userId og lectureId.
+ * */
 function createReview() {
     var rating = $("#lectureRating").val();
 
+    //I tilfælde af at der ikke afgivet en bedømmelse sættes den til 0.
     if(rating === ""){
         rating = 0;
     }
@@ -185,6 +208,9 @@ function createReview() {
     );
 }
 
+/**
+ * Sletter kommentar for den ønskede bruger.
+ * */
 function deleteReview() {
     var id = $("#deleteComment").attr("data-id");
     var userID = SDK.Storage.load("userId");

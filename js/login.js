@@ -12,7 +12,7 @@ function login(){
 
     SDK.login(email, password, function(err, data){
 
-        //On wrong credentials
+        //Forkerte loginoplysninger
         if(err) {
             return $(".form-signin").addClass("has-error");
         }
